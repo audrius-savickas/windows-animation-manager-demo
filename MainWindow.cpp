@@ -9,6 +9,8 @@
 #include "MainWindow.h"
 #include "ManagerEventHandler.h"
 #include "UIAnimationSample.h"
+#include <string>
+#include <sstream>
 
 const DOUBLE COLOR_MIN = 0.0;
 const DOUBLE COLOR_MAX = 1.0;
@@ -182,9 +184,7 @@ HRESULT CMainWindow::InitializeAnimation()
 
 HRESULT CMainWindow::CreateAnimationVariables()
 {
-    const DOUBLE INITIAL_RED = COLOR_MAX;
-    const DOUBLE INITIAL_GREEN = COLOR_MAX;
-    const DOUBLE INITIAL_BLUE = COLOR_MAX;
+    const DOUBLE INITIAL_RED = COLOR_MAX; // 1.0f
 
     HRESULT hr = m_pAnimationManager->CreateAnimationVariable(
         INITIAL_RED,
@@ -192,10 +192,10 @@ HRESULT CMainWindow::CreateAnimationVariables()
         );
     if (SUCCEEDED(hr))
     {
-        hr = m_pAnimationVariableRed->SetLowerBound(COLOR_MIN);
+        hr = m_pAnimationVariableRed->SetLowerBound(COLOR_MIN); // 0.0f
         if (SUCCEEDED(hr))
         {
-            hr = m_pAnimationVariableRed->SetUpperBound(COLOR_MAX);
+            hr = m_pAnimationVariableRed->SetUpperBound(COLOR_MAX); // 1.0f
         }
     }
     
@@ -492,7 +492,7 @@ HRESULT CMainWindow::DrawClientArea()
                 sizeRenderTarget.height
                 )
             );
-                       
+
         // Can only return one failure HRESULT
         HRESULT hrEndDraw = m_pRenderTarget->EndDraw();
         if (SUCCEEDED(hr))
@@ -515,7 +515,7 @@ HRESULT CMainWindow::DrawBackground(
     const D2D1_RECT_F &rectPaint
     )
 {
-    // Get the RGB animation variable values
+    // Get the red animation variable value
 
     DOUBLE red;
     HRESULT hr = m_pAnimationVariableRed->GetValue(
@@ -525,7 +525,7 @@ HRESULT CMainWindow::DrawBackground(
     {
         if (SUCCEEDED(hr))
         {
-            // Set the RGB of the background brush to the new animated value
+            // Set the red value of the background brush to the new animated value
 
             m_pBackgroundBrush->SetColor(
                 D2D1::ColorF(
@@ -552,8 +552,13 @@ HRESULT CMainWindow::DrawBackground(
 
 HRESULT CMainWindow::ChangeColor(
     DOUBLE red
-    )
+    ) 
 {
+    std::wstringstream wss;
+    wss << red;
+    LPCWSTR wideString = L"New animation variable value: ";
+    MessageBox(NULL, (std::wstring(wideString) + wss.str()).c_str(), L"Red", MB_OK);
+
     const UI_ANIMATION_SECONDS DURATION = 1;
     const DOUBLE ACCELERATION_RATIO = 0.5;
     const DOUBLE DECELERATION_RATIO = 0.5;
